@@ -18,13 +18,18 @@ import (
 var addr = flag.String("addr", "0.0.0.0:8080", "http service address")
 
 var upgrader = websocket.Upgrader{} // use default options
-
+var clientmap map[string]*websocket.Conn = make(map[string]*websocket.Conn)
+var count int = 0
 func echo(w http.ResponseWriter, r *http.Request) {
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Print("upgrade:", err)
 		return
 	}
+	count+=1
+	mt, username, err := c.ReadMessage()
+	log.Println(mt)
+	clientmap [string(username)] = c
 	defer c.Close()
 	for {
 		mt, message, err := c.ReadMessage()
@@ -33,7 +38,9 @@ func echo(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		log.Printf("recv: %s", message)
-		err = c.WriteMessage(mt, message)
+		for connection := range clientmap{
+			err = clientmap[connection].WriteMessage(mt, []byte(string(username)+": "+string(message)))
+		}
 		if err != nil {
 			log.Println("write:", err)
 			break
@@ -62,6 +69,7 @@ var homeTemplate = template.Must(template.New("").Parse(`
 window.addEventListener("load", function(evt) {
     var output = document.getElementById("output");
     var input = document.getElementById("input");
+	var user = document.getElementById("user");
     var ws;
     var print = function(message) {
         var d = document.createElement("div");
@@ -74,14 +82,15 @@ window.addEventListener("load", function(evt) {
         }
         ws = new WebSocket("{{.}}");
         ws.onopen = function(evt) {
-            print("OPEN");
+            print("OPEN"+user.value);
+			ws.send(user.value);
         }
         ws.onclose = function(evt) {
             print("CLOSE");
             ws = null;
         }
         ws.onmessage = function(evt) {
-            print("RESPONSE: " + evt.data);
+            print(evt.data);
         }
         ws.onerror = function(evt) {
             print("ERROR: " + evt.data);
@@ -92,7 +101,7 @@ window.addEventListener("load", function(evt) {
         if (!ws) {
             return false;
         }
-        print("SEND: " + input.value);
+        print(input.value);
         ws.send(input.value);
         return false;
     };
@@ -116,6 +125,7 @@ You can change the message and send multiple times.
 <form>
 <button id="open">Open</button>
 <button id="close">Close</button>
+<p><input id="user" type="text" value="username">
 <p><input id="input" type="text" value="Hello world!">
 <button id="send">Send</button>
 </form>
