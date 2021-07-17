@@ -39,6 +39,9 @@ func echo(w http.ResponseWriter, r *http.Request) {
 		}
 		log.Printf("recv: %s", message)
 		for connection := range clientmap{
+			if connection ==string(username) {
+				continue;
+			}
 			err = clientmap[connection].WriteMessage(mt, []byte(string(username)+": "+string(message)))
 		}
 		if err != nil {
