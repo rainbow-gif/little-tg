@@ -1,0 +1,24 @@
+syntax = "proto3";
+package littletg;
+
+//import "google/protobuf/timestamp.proto";
+option go_package = "github.com/protocolbuffers/protobuf/examples/go/littletgpb";
+message tgmessage {
+  string username = 1;
+  string message = 2;  // Unique ID number for this person.
+
+
+//  message PhoneNumber {
+//    string number = 1;
+//    PhoneType type = 2;
+//  }
+//
+//  repeated PhoneNumber phones = 4;
+//
+//  google.protobuf.Timestamp last_updated = 5;
+//}
+//
+//// Our address book file is just one of these.
+//message AddressBook {
+//  repeated Person people = 1;
+}

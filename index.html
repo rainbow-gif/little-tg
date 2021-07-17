@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="./tg.js"></script>
+    <script>
+        var p = new proto.littletg.tgmessage();
+        p.setMessage("hello");
+        p.setUsername("Tom")
+
+        var bytes = p.serializeBinary();
+        var unBytes = proto.littletg.tgmessage.deserializeBinary(bytes);
+        var name = p.getUsername();
+        var message = p.getMessage();
+
+
+
+        console.log(bytes);
+        console.log(unBytes);
+        console.log("==================================");
+        console.log("my name is ", name,"message is", message);
+    </script>
+
+    <script>
+
+        window.addEventListener("load", function(evt) {
+            var output = document.getElementById("output");
+            var input = document.getElementById("input");
+            var user = document.getElementById("user");
+            var ws;
+            var print = function(message) {
+                var d = document.createElement("div");
+                d.innerHTML = message;
+                output.appendChild(d);
+            };
+            document.getElementById("open").onclick = function(evt) {
+                if (ws) {
+                    return false;
+                }
+                ws = new WebSocket("{{.}}");
+                ws.binaryType = 'arraybuffer';
+
+
+                ws.onopen = function(evt) {
+                    print("OPEN"+user.value);
+                    ws.send(user.value);
+                }
+                ws.onclose = function(evt) {
+                    print("CLOSE");
+                    ws = null;
+                }
+                ws.onmessage = function(evt) {
+
+                    //var reader = new FileReader();
+                    //reader.readAsArrayBuffer(evt.data);
+                    //var buf = new Uint8Array(reader.result);
+                    var unBytes = proto.littletg.tgmessage.deserializeBinary(evt.data);
+                    print(unBytes.getUsername()+":  "+unBytes.getMessage());
+                    // reader.onload = function(e){
+                    //                  var buf = new Uint8Array(reader.result);
+                    //                  var unBytes = proto.littletg.tgmessage.deserializeBinary(buf);
+                    //                  console.log('yes')
+                    //                  print(unBytes.getMessage());
+                    //                  console.log(unBytes)
+                    //             }
+
+
+
+                }
+                ws.onerror = function(evt) {
+                    print("ERROR: " + evt.data);
+                }
+                return false;
+            };
+            document.getElementById("send").onclick = function(evt) {
+                if (!ws) {
+                    return false;
+                }
+                var p = new proto.littletg.tgmessage();
+                p.setUsername(user.value);
+                p.setMessage(input.value);
+
+
+                var bytes = p.serializeBinary();
+                print(bytes);
+                ws.send(bytes);
+                return false;
+            };
+            document.getElementById("close").onclick = function(evt) {
+                if (!ws) {
+                    return false;
+                }
+                ws.close();
+                return false;
+            };
+        });
+    </script>
+</head>
+<body>
+<table>
+    <tr><td valign="top" width="50%">
+        <p>Click "Open" to create a connection to the server,
+            "Send" to send a message to the server and "Close" to close the connection.
+            You can change the message and send multiple times.
+        <p>
+        <form>
+            <button id="open">Open</button>
+            <button id="close">Close</button>
+            <p><input id="user" type="text" value="username">
+            <p><input id="input" type="text" value="Hello world!">
+                <button id="send">Send</button>
+        </form>
+    </td><td valign="top" width="50%">
+        <div id="output"></div>
+    </td></tr></table>
+</body>
+</html>

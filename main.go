@@ -8,11 +8,13 @@ package main
 
 import (
 	"flag"
+	"github.com/go-basic/uuid"
+	"github.com/gorilla/websocket"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
-
-	"github.com/gorilla/websocket"
+	"os"
 )
 
 var addr = flag.String("addr", "0.0.0.0:8080", "http service address")
@@ -27,9 +29,10 @@ func echo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	count+=1
-	mt, username, err := c.ReadMessage()
-	log.Println(mt)
-	clientmap [string(username)] = c
+	//mt, username, err := c.ReadMessage()
+	//log.Println(mt)
+	uuid := uuid.New()
+	clientmap [uuid] = c
 	defer c.Close()
 	for {
 		mt, message, err := c.ReadMessage()
@@ -39,10 +42,22 @@ func echo(w http.ResponseWriter, r *http.Request) {
 		}
 		log.Printf("recv: %s", message)
 		for connection := range clientmap{
-			if connection ==string(username) {
+			if connection ==uuid {
 				continue;
 			}
-			err = clientmap[connection].WriteMessage(mt, []byte(string(username)+": "+string(message)))
+			//tgmessage := &pb.Tgmessage{
+			//	Username: string(username),
+			//	Message: string(message),
+			//}
+			// ...
+
+			// Write the new address book back to disk.
+			//out, err := proto.Marshal(tgmessage)
+			//if err != nil {
+			//	log.Println("read:", err)
+			//	break
+			//}
+			err = clientmap[connection].WriteMessage(mt, message)
 		}
 		if err != nil {
 			log.Println("write:", err)
@@ -54,87 +69,33 @@ func echo(w http.ResponseWriter, r *http.Request) {
 func home(w http.ResponseWriter, r *http.Request) {
 	homeTemplate.Execute(w, "ws://"+r.Host+"/echo")
 }
-
+func meassage(w http.ResponseWriter, r *http.Request) {
+	file, err := os.Open("./tg.js")
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+	content, err := ioutil.ReadAll(file)
+	w.Write(content)
+}
 func main() {
 	flag.Parse()
 	log.SetFlags(0)
 	http.HandleFunc("/echo", echo)
+	http.HandleFunc("/tg.js", meassage)
 	http.HandleFunc("/", home)
 	log.Fatal(http.ListenAndServe(*addr, nil))
+
 }
 
-var homeTemplate = template.Must(template.New("").Parse(`
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<script>  
-window.addEventListener("load", function(evt) {
-    var output = document.getElementById("output");
-    var input = document.getElementById("input");
-	var user = document.getElementById("user");
-    var ws;
-    var print = function(message) {
-        var d = document.createElement("div");
-        d.innerHTML = message;
-        output.appendChild(d);
-    };
-    document.getElementById("open").onclick = function(evt) {
-        if (ws) {
-            return false;
-        }
-        ws = new WebSocket("{{.}}");
-        ws.onopen = function(evt) {
-            print("OPEN"+user.value);
-			ws.send(user.value);
-        }
-        ws.onclose = function(evt) {
-            print("CLOSE");
-            ws = null;
-        }
-        ws.onmessage = function(evt) {
-            print(evt.data);
-        }
-        ws.onerror = function(evt) {
-            print("ERROR: " + evt.data);
-        }
-        return false;
-    };
-    document.getElementById("send").onclick = function(evt) {
-        if (!ws) {
-            return false;
-        }
-        print(input.value);
-        ws.send(input.value);
-        return false;
-    };
-    document.getElementById("close").onclick = function(evt) {
-        if (!ws) {
-            return false;
-        }
-        ws.close();
-        return false;
-    };
-});
-</script>
-</head>
-<body>
-<table>
-<tr><td valign="top" width="50%">
-<p>Click "Open" to create a connection to the server, 
-"Send" to send a message to the server and "Close" to close the connection. 
-You can change the message and send multiple times.
-<p>
-<form>
-<button id="open">Open</button>
-<button id="close">Close</button>
-<p><input id="user" type="text" value="username">
-<p><input id="input" type="text" value="Hello world!">
-<button id="send">Send</button>
-</form>
-</td><td valign="top" width="50%">
-<div id="output"></div>
-</td></tr></table>
-</body>
-</html>
-`))
+
+func  ReadHtml() string{
+	file, err := os.Open("./index.html")
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+	content, err := ioutil.ReadAll(file)
+	return string(content)
+}
+var homeTemplate = template.Must(template.New("").Parse(ReadHtml()))
