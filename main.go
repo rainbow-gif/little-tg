@@ -78,6 +78,7 @@ func meassage(w http.ResponseWriter, r *http.Request) {
 	content, err := ioutil.ReadAll(file)
 	w.Write(content)
 }
+
 func main() {
 	flag.Parse()
 	log.SetFlags(0)
