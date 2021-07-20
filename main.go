@@ -15,8 +15,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 )
-
+var menber int = 0
 var addr = flag.String("addr", "0.0.0.0:8080", "http service address")
 
 var upgrader = websocket.Upgrader{} // use default options
@@ -33,6 +34,7 @@ func echo(w http.ResponseWriter, r *http.Request) {
 	//log.Println(mt)
 	uuid := uuid.New()
 	clientmap [uuid] = c
+	menber = len(clientmap)
 	defer c.Close()
 	for {
 		mt, message, err := c.ReadMessage()
@@ -64,11 +66,22 @@ func echo(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
+	delete(clientmap, uuid)
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
-	homeTemplate.Execute(w, "ws://"+r.Host+"/echo")
+	str := strconv.Itoa(menber)
+	data := map[string]string{
+		"url":    "ws://"+r.Host+"/echo",
+		"menber": "在线人数: "+ str,
+	}
+
+
+	homeTemplate.Execute(w, data)
 }
+//func numb(w http.ResponseWriter, r *http.Request) {
+//	homeTemplate.Execute(w, string(menber))
+//}
 func meassage(w http.ResponseWriter, r *http.Request) {
 	file, err := os.Open("./tg.js")
 	if err != nil {
