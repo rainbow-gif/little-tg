@@ -1,0 +1,250 @@
+下下周一，你准备下springboot相关的开发流程，给大家分享下。搞一个PPT。可以拿我们dubhe里面的例子（找王颖）或以前你做的项目做例子。
+
+License server server address
+
+get from VCS
+
+version control 中的git、mercuial和
+
+java file outside of source root
+
+
+
+spring boot是为了简化spring应用开发的一门技术，它
+ 一般是和我们的项目构建工具maven或者gradle一起使用。
+ 它提供四大特性: 起步依懒、自动配置、运行監控、CLI
+
+
+
+
+开发四步曲
+1、编写一个Java类，并且这个类上面有@Configuration代表这是一个配置类
+ 2、在Java配置文件中要配置组件扫描@ComponentScan("cn.guyue") 如果不指定包就以配置类的包作为要扫描的包
+ 3、手动配置Bean、和手动注入
+ 
+
+@Bean
+	public MController mcontroller(){
+		MController mController = new MController();
+		mController.setMservice(mservice());
+		return mController;
+	}
+	
+	@Bean 
+	public MService mservice(){
+		MService mService = new MService();
+		mService.setMdao(mdao());
+		return mService;
+	}
+	
+	
+	@Bean
+	public MDao mdao(){
+		return new MDao();
+	}
+
+
+ 4、一定要使用AnnotationConfigApplicationContext(Application.class);
+PermissionAuditData
+
+创建POJO——entity/User.java
+
+　　这是一个POJO，包含了id, name, age三个属性，代码如下：即domain实体类
+
+创建一个数据层接口——service/UserDao.java
+
+　　这是一个Mapper类，代码如下：即dao层 
+ 
+ApplicationContext applicationContext = new AnnotationConfigApplicationContext(Application.class);
+    MController mController = applicationContext.getBean(MController.class);
+    System.out.println(mController);
+
+PermissionMapper
+
+创建一个数据层接口——mapper/PermissionMapper.java，这是一个Mapper类，代码如下：即dao层
+
+创建一个用户服务——service/UserService.java
+
+　　这是一个服务类Bean，提供三个函数功能，代码如下：即service层
+
+
+PermissionServiceImpl
+
+
+这是一个Spring Web的Controller类，引入了spring-boot-starter-web依赖
+
+
+
+
+
+
+基于springboot集成activiti,前后端分离，后端提供json数据
+
+
+持久层集成spring-boot-starter-data-jpa, 项目启动后,表结构自动创建,  数据库用mysql.
+
+
+
+负载均衡
+LVS+Nginx
+
+
+
+这篇我们说一下springboot整合模板引擎。一般项目里是需要用页面来展示数据的。springboot里可以整合freemarker模板，还可以整合thymeleaf模板。
+
+【整合freemarker模板】步骤：
+
+1、打开pom.xml文件，添加如下依赖：同样添加到<dependencies>标签内。
+
+              <dependency>
+
+<groupId>org.springframework.boot</groupId>
+
+<artifactId>spring-boot-starter-freemarker</artifactId>
+
+</dependency>
+
+SpringBoot特性
+SpringBoot对上述Spring的缺点进行的改善和优化，基于约定优于配置的思想，可以让开发人员不必在配置与逻辑 业务之间进行思维的切换，全身心的投入到逻辑业务的代码编写中，从而大大提高了开发的效率，一定程度上缩短 了项目周期。
+
+
+2、在src/main/resources里新建一个文件夹，这个文件夹用于放置freemarker页面模板（页面文件后缀是ftl）。文件夹名称自定义，我这里定义为templates。
+
+
+
+
+
+
+
+
+
+
+
+
+
+IDEA 中可以通过File->New->Project来快速构建 Spring Boot 工程。如下，选择 Spring Initializr，在 Project SDK 中选择刚刚我们导入的 jdk，点击 Next，到了项目的配置信息。
+
+Group：填企业域名，本课程使用com.itcodai
+Artifact：填项目名称，本课程中每一课的工程名以course+课号命令，这里使用 course01
+Dependencies：可以添加我们项目中所需要的依赖信息，根据实际情况来添加，本课程只需要选择 Web 即可。
+
+
+Spring Boot 项目工程结构
+
+
+
+
+
+
+
+总体设计
+
+
+结构设计
+
+springboot.util
+springboot.controller
+
+
+
+
+
+
+
+
+
+
+
+原文链接：https://blog.csdn.net/oschina_41740100/article/details/80630738
+
+如同导入mybatis,其余redis等相同，mybatis取代JDBC操作数据库，消耗量小于JDBC
+因为mybatis是基于JDBC实现的，所以mybatis的销量是低于JDBC的。
+
+Mybatis是一个优秀的持久层框架，它对JDBC操作数据库的过程进行封装，使开发者只需要关注sql本身。
+
+我们原来使用JDBC操作数据库，需要手动的写代码去注册驱动、获取connection、获取statement等等，现在Mybaits帮助我们把这些事情做了，我们只需要关注我们的业务sql即可，这样可以提高我们的开发效率。
+
+MyBatis属于半自动的ORM框架
+mybatis一个基于Java的持久层框架
+
+
+我们可以看到它组合了@SpringBootConfiguration、@EnableAutoConfiguration以及@ComponentScan，我们在开发的过程中如果不使用@SpringBootApplication，
+则可以组合使用这三个注解。这三个注解中，@SpringBootConfiguration实际上就是我们前面几篇博客提到的@Configuration注解，表明这个类是一个配置类，
+@EnableAutoConfiguration则表示让Spring Boot根据类路径中的jar包依赖为当前项目进行自动配置，最后一个@ComponentScan的作用我也不赘述了，
+唯一要注意的是如果我们使用了@SpringBootApplication注解的话，系统会去入口类的同级包以及下级包中去扫描实体类，
+因此我们建议入口类的位置在groupId+arctifactID组合的包名下。
+
+演讲稿：
+如果不设置basePackage的话 默认会扫描包的所有类，所以最好还是写上basePackage ,减少加载时间
+
+
+SpringBootApplication中的scanBasePackages
+
+springboot注解@Configuration属性proxyBeanMethods详解
+proxyBeanMethods属性默认值是true,也就是说该配置类会被代理（CGLIB），在同一个配置文件中调用其它被@Bean注解标注的方法获取对象时会直接从IOC容器之中获取；
+注解的意思是proxyBeanMethods配置类是用来指定@Bean注解标注的方法是否使用代理，默认是true使用代理，直接从IOC容器之中取得对象；如果设置为false,也就是不使用注解，每次调用@Bean标注的方法获取到的对象和IOC容器中的都不一样，是一个新的对象，所以我们可以将此属性设置为false来提高性能；
+
+
+ exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class, JooqAutoConfiguration.class})
+
+通过dubug发现，springboot自动配置了支持mongodb。在启动springboot时会自动实例化一个mongo实例。这不是我们想看到的。所以考虑禁用掉springboot的自动配置。
+@SpringBootApplication (exclude = MongoAutoConfiguration. class )：
+这个注解可以禁用springboot自带的配置。
+
+
+@SpringBootApplication注解等价于//这个注解等价于@Configuration + @ComponentScan + @EnableAutoConfiguration
+ 有三层意思: 1、代表这是一个配置类 2、开启包扫描 3、开启自动配置
+
+
+
+
+ 创建webapp/WEB-INF/jsp 存放jsp
+ 
+ * 拷POJO
+ 
+ * 实现案例
+ 
+ * 准备前台页面
+ 
+ * 编写Controller
+ 
+ * 编写Service
+ 
+ * 编写Dao (添加mybatis起步依懒,配置数据库连接信息，配置SqlSessionFactory)
+ 添加mybatis起步依懒
+
+@Controller表示在tomcat启动的时候，把这个类作为一个控制器加载到Spring的Bean工厂，如果不加，就是一个普通的类，和Spring没有半毛钱关系。
+
+以下是两个常见的配置：
+@Controller用于标记在一个类上，使用它标记的类就是一个SpringMvc Controller对象，分发处理器会扫描使用该注解的类的方法，并检测该方法是否使用了@RequestMapping注解。
+@Controller只是定义了一个控制器类，而使用@RequestMapping注解的方法才是处理请求的处理器。
+@Controller标记在一个类上还不能真正意义上说它就是SpringMvc的控制器，应为这个时候Spring还不认识它，这个时候需要把这个控制器交给Spring来管理。有两种方式可以管理：
+
+
+
+mapper扫描两种： 1.直接在具体dao层使用 @Mapper注解（只能一个一个配置，麻烦） 2.直接在启动类上使用注解@MapperScan(指定要扫描mapper文件的包的路径)
+
+集成aop
+AOP概述
+  AOP是Aspect-Oriented Programming，即为面向（切面）方面编程。在维基百科中的解释：Aspect是一种新的模块化机制，用来描述分散在对象、类或函数中的横切关注点。从关注点中分离出横切关注点是面向切面的程序设计核心概念。分离关注点使得解决特定领域问题的代码从业务逻辑中独立出来，
+业务逻辑代码不需要再包含针对特定领域问题代码的调用，比如一些公用模块的日志、安全等代码。
+  代码通过切面抽离，更加整齐和清晰，将重复的代码抽取出来单独的进行维护，在需要使用的时候，统一调用这些公共模块的代码，这样一个类就是一个基本的模块，方便统一维护和扩展更新。
+  AOP就是为业务实现提供了切面注入的一种机制，将定义好的切面通过切入点（pointcut）在业务逻辑中进行绑定。比如SpringBoot微服务中的所有controller层需要对http请求进行一些常规日志的打印，
+如果每次在controller进行打印，代码就会冗余，如果说将这些公共代码进行封装，也需要每一个controller类进行调用，所以AOP出现的恰到好处，这时候引入AOP对http相关的日志逻辑进行统一管理编写代码，
+不需要controller层进行调用，只需要创建一个切面，并通过切入点绑定controller即可，下面的示例会讲到。
+
+
+比如SpringBoot微服务中的所有controller层需要对http请求进行一些常规日志的打印，如果每次在controller进行打印，代码就会冗余，如果说将这些公共代码进行封装，也需要每一个controller类进行调用，所以AOP出现的恰到好处，这时候引入AOP对http相关的日志逻辑进行统一管理编写代码，不需要controller层进行调用，只需要创建一个切面，并通过切入点绑定controller即可
+
+@Repository持久层
+此注解式持久层组件，用于标注数据访问组件，即DAO组件
+DAO层
+
+配置类使用
+Configuration
+
+全局异常处理
+自定义异常
+异常处理器
+
+DubheException
